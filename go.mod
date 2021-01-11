@@ -48,6 +48,7 @@ require (
 	github.com/json-iterator/go v1.1.10
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
+	github.com/keybase/go-keychain v0.0.0-20201121013009-976c83ec27a6 // indirect
 	github.com/kr/pty v1.1.1
 	github.com/kylelemons/godebug v0.0.0-20160406211939-eadb3ce320cb
 	github.com/mailgun/lemma v0.0.0-20160211003854-e8b0cd607f58
