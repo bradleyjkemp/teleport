@@ -233,8 +233,6 @@ github.com/gravitational/form
 github.com/gravitational/kingpin
 # github.com/gravitational/license v0.0.0-20180912170534-4f189e3bd6e3
 ## explicit
-github.com/gravitational/license
-github.com/gravitational/license/constants
 # github.com/gravitational/oxy v0.0.0-20200916204440-3eb06d921a1d
 ## explicit
 github.com/gravitational/oxy/connlimit
@@ -243,9 +241,6 @@ github.com/gravitational/oxy/ratelimit
 github.com/gravitational/oxy/utils
 # github.com/gravitational/reporting v0.0.0-20180907002058-ac7b85c75c4c
 ## explicit
-github.com/gravitational/reporting
-github.com/gravitational/reporting/client
-github.com/gravitational/reporting/types
 # github.com/gravitational/roundtrip v1.0.0
 ## explicit
 github.com/gravitational/roundtrip
@@ -290,6 +285,9 @@ github.com/julienschmidt/httprouter
 # github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 ## explicit
 github.com/kardianos/osext
+# github.com/keybase/go-keychain v0.0.0-20201121013009-976c83ec27a6
+## explicit
+github.com/keybase/go-keychain
 # github.com/konsorten/go-windows-terminal-sequences v1.0.3
 github.com/konsorten/go-windows-terminal-sequences
 # github.com/kr/pty v1.1.1

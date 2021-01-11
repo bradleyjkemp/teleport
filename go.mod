@@ -35,9 +35,9 @@ require (
 	github.com/gravitational/configure v0.0.0-20160909185025-1db4b84fe9db
 	github.com/gravitational/form v0.0.0-20151109031454-c4048f792f70
 	github.com/gravitational/kingpin v2.1.11-0.20190130013101-742f2714c145+incompatible
-	github.com/gravitational/license v0.0.0-20180912170534-4f189e3bd6e3
+	github.com/gravitational/license v0.0.0-20180912170534-4f189e3bd6e3 // indirect
 	github.com/gravitational/oxy v0.0.0-20200916204440-3eb06d921a1d
-	github.com/gravitational/reporting v0.0.0-20180907002058-ac7b85c75c4c
+	github.com/gravitational/reporting v0.0.0-20180907002058-ac7b85c75c4c // indirect
 	github.com/gravitational/roundtrip v1.0.0
 	github.com/gravitational/trace v1.1.13
 	github.com/gravitational/ttlmap v0.0.0-20171116003245-91fd36b9004c
@@ -48,7 +48,7 @@ require (
 	github.com/json-iterator/go v1.1.10
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
-	github.com/keybase/go-keychain v0.0.0-20201121013009-976c83ec27a6 // indirect
+	github.com/keybase/go-keychain v0.0.0-20201121013009-976c83ec27a6
 	github.com/kr/pty v1.1.1
 	github.com/kylelemons/godebug v0.0.0-20160406211939-eadb3ce320cb
 	github.com/mailgun/lemma v0.0.0-20160211003854-e8b0cd607f58
