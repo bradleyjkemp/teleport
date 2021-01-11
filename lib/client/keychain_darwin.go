@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gravitational/trace"
 	"github.com/keybase/go-keychain"
 )
 
@@ -17,7 +18,6 @@ type KeychainLocalKeyStore struct{
 }
 
 func NewKeychainLocalKeyStore(publicStore LocalKeyStore) (s *KeychainLocalKeyStore, err error) {
-	fmt.Fprintln(os.Stderr, "Using the keychain :)") // TODO: removeme
 	return &KeychainLocalKeyStore{
 		publicStore,
 	}, nil
@@ -28,26 +28,52 @@ func (k KeychainLocalKeyStore) AddKey(proxy string, username string, key *Key) e
 	if err != nil {
 		return fmt.Errorf("failed marshalling key: %w", err)
 	}
-	return keychain.AddItem(keychain.NewGenericPassword("tsh:"+proxy, username, "", data, ""))
+	// always delete the key (if it exists)
+	_ = k.DeleteKey(proxy, username)
+	return keychain.AddItem(keychain.NewGenericPassword("teleport", username, proxy,  data, ""))
 }
 
 func (k KeychainLocalKeyStore) GetKey(proxy string, username string) (*Key, error) {
-	data, err := keychain.GetGenericPassword("tsh:"+proxy, username, "", "")
+	data, err := keychain.GetGenericPassword("teleport", username, proxy, "")
 	if err != nil {
-		return nil, fmt.Errorf("failed to get password from keychain: %w", err)
+		return nil, trace.Errorf("failed to get password from keychain: %w", err)
+	}
+	if len(data) == 0 {
+		return nil, trace.NotFound("no session keys for %v in %v", username, proxy)
 	}
 
-	var key *Key
-	if err := json.Unmarshal(data, key); err != nil {
+	var key Key
+	if err := json.Unmarshal(data, &key); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal key: %w", err)
 	}
-	return key, nil
+	return &key, nil
 }
 
 func (k KeychainLocalKeyStore) DeleteKey(proxy string, username string) error {
-	return keychain.DeleteItem(keychain.NewGenericPassword("tsh:"+proxy, username, "", nil, ""))
+	err := keychain.DeleteItem(keychain.NewGenericPassword("teleport", username, proxy, nil, ""))
+	switch err {
+	case nil, keychain.ErrorItemNotFound:
+		return nil
+	default:
+		return err
+	}
 }
 
 func (k KeychainLocalKeyStore) DeleteKeys() error {
-	panic("implement me")
+	query := keychain.NewItem()
+	query.SetSecClass(keychain.SecClassGenericPassword)
+	query.SetService("teleport")
+	query.SetMatchLimit(keychain.MatchLimitAll)
+	query.SetReturnData(false)
+
+	items, err := keychain.QueryItem(query)
+	if err != nil {
+		return trace.Errorf("failed to find keychain items: %w", err)
+	}
+	for _, item := range items {
+		if err := k.DeleteKey(item.Label, item.Account); err != nil {
+			return trace.Errorf("failed to delete item: %w", err)
+		}
+	}
+	return nil
 }
