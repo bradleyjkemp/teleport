@@ -55,6 +55,9 @@ type Profile struct {
 	// DynamicForwardedPorts is a list of ports to use for dynamic port
 	// forwarding (SOCKS5).
 	DynamicForwardedPorts []string `yaml:"dynamic_forward_ports,omitempty"`
+
+	// UseKeychain tells the client to store credentials in the OS keychain rather than on disk
+	UseKeychain bool `yaml:"use_keychain,omitempty"`
 }
 
 // Name returns the name of the profile.

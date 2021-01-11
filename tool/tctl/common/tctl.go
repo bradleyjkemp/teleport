@@ -96,7 +96,6 @@ func Run(commands []CLICommand, loadConfigExt LoadConfigFn) {
 
 	// these global flags apply to all commands
 	var ccf GlobalCLIFlags
-	ccf.Debug = true // TODO: removeme
 	app.Flag("debug", "Enable verbose logging to stderr").
 		Short('d').
 		BoolVar(&ccf.Debug)

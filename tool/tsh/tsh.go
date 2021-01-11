@@ -191,6 +191,9 @@ type CLIConf struct {
 	// PreserveAttrs preserves access/modification times from the original file.
 	PreserveAttrs bool
 
+	// UseKeychain tells the client to store credentials in the OS keychain rather than on disk
+	UseKeychain bool
+
 	// executablePath is the absolute path to the current executable.
 	executablePath string
 }
@@ -248,6 +251,7 @@ func Run(args []string) {
 	app.Flag("gops-addr", "Specify gops addr to listen on").Hidden().StringVar(&cf.GopsAddr)
 	app.Flag("skip-version-check", "Skip version checking between server and client.").BoolVar(&cf.SkipVersionCheck)
 	app.Flag("debug", "Verbose logging to stdout").Short('d').BoolVar(&cf.Debug)
+	app.Flag("use-keychain", "Use OS keychain to store sensitive credentials").BoolVar(&cf.UseKeychain)
 	app.Flag("use-local-ssh-agent", "Load generated SSH certificates into the local ssh-agent (specified via $SSH_AUTH_SOCK). You can also set TELEPORT_USE_LOCAL_SSH_AGENT environment variable. Default is true.").
 		Envar(useLocalSSHAgentEnvVar).
 		Default("true").
@@ -1416,6 +1420,7 @@ func makeClient(cf *CLIConf, useProfileLogin bool) (*client.TeleportClient, erro
 		c.HostKeyCallback = client.InsecureSkipHostKeyChecking
 	}
 	c.BindAddr = cf.BindAddr
+	c.UseKeychain = cf.UseKeychain
 
 	// Don't execute remote command, used when port forwarding.
 	c.NoRemoteExec = cf.NoRemoteExec

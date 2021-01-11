@@ -401,9 +401,16 @@ func readProfile(profileDir string, profileName string) (*ProfileStatus, error) 
 	}
 
 	// Read in the SSH certificate for the user logged into this proxy.
-	store, err := NewFSLocalKeyStore(profileDir)
+	var store LocalKeyStore
+	store, err = NewFSLocalKeyStore(profileDir)
 	if err != nil {
 		return nil, trace.Wrap(err)
+	}
+	if profile.UseKeychain {
+		store, err = NewKeychainLocalKeyStore(store)
+		if err != nil {
+			return nil, trace.Wrap(err)
+		}
 	}
 	key, err := store.GetKey(profile.Name(), profile.Username, WithKubeCerts(profile.SiteName))
 	if err != nil {
@@ -639,6 +646,7 @@ func (c *Config) SaveProfile(dir string, makeCurrent bool) error {
 	cp.KubeProxyAddr = c.KubeProxyAddr
 	cp.ForwardedPorts = c.LocalForwardPorts.String()
 	cp.SiteName = c.SiteName
+	cp.UseKeychain = c.UseKeychain
 
 	if err := cp.SaveToDir(dir, makeCurrent); err != nil {
 		return trace.Wrap(err)
