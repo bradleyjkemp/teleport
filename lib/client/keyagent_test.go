@@ -222,7 +222,9 @@ func (s *KeyAgentTestSuite) TestLoadKey(c *check.C) {
 
 func (s *KeyAgentTestSuite) TestHostCertVerification(c *check.C) {
 	// Make a new local agent.
-	lka, err := NewLocalAgent(s.keyDir, s.hostname, s.username, true)
+	keystore, err := NewFSLocalKeyStore(s.keyDir)
+	c.Assert(err, check.IsNil)
+	lka, err := NewLocalAgent(keystore, s.hostname, s.username, true)
 	c.Assert(err, check.IsNil)
 
 	// By default user has not refused any hosts.
@@ -359,7 +361,9 @@ func (s *KeyAgentTestSuite) TestHostKeyVerification(c *check.C) {
 func (s *KeyAgentTestSuite) TestDefaultHostPromptFunc(c *check.C) {
 	keygen := testauthority.New()
 
-	a, err := NewLocalAgent(s.keyDir, s.hostname, s.username, true)
+	keystore, err := NewFSLocalKeyStore(s.keyDir)
+	c.Assert(err, check.IsNil)
+	a, err := NewLocalAgent(keystore, s.hostname, s.username, true)
 	c.Assert(err, check.IsNil)
 
 	_, keyBytes, err := keygen.GenerateKeyPair("")

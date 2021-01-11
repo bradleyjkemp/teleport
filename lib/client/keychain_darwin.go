@@ -13,13 +13,13 @@ import (
 // KeychainLocalKeyStore stores sensitive key material in the OS keychain and delegates
 // non-sensitive/public material to the wrapped LocalKeyStore (usually the filesystem)
 type KeychainLocalKeyStore struct {
-	LocalKeyStore
+	*FSLocalKeyStore
 }
 
-func NewKeychainLocalKeyStore(publicStore LocalKeyStore) (s *KeychainLocalKeyStore, err error) {
+func NewKeychainLocalKeyStore(fsKeystore *FSLocalKeyStore) (s *KeychainLocalKeyStore) {
 	return &KeychainLocalKeyStore{
-		publicStore,
-	}, nil
+		fsKeystore,
+	}
 }
 
 func (k KeychainLocalKeyStore) AddKey(proxy string, username string, key *Key) error {
@@ -32,7 +32,7 @@ func (k KeychainLocalKeyStore) AddKey(proxy string, username string, key *Key) e
 	return keychain.AddItem(keychain.NewGenericPassword("teleport", username, proxy, data, ""))
 }
 
-func (k KeychainLocalKeyStore) GetKey(proxy string, username string) (*Key, error) {
+func (k KeychainLocalKeyStore) GetKey(proxy string, username string, opts ...KeyOption) (*Key, error) {
 	data, err := keychain.GetGenericPassword("teleport", username, proxy, "")
 	if err != nil {
 		return nil, trace.Errorf("failed to get password from keychain: %w", err)
@@ -45,17 +45,27 @@ func (k KeychainLocalKeyStore) GetKey(proxy string, username string) (*Key, erro
 	if err := json.Unmarshal(data, &key); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal key: %w", err)
 	}
+
+	for _, o := range opts {
+		if err := o.getKey(k.KeyDir, username, &key); err != nil {
+			k.log.Error(err)
+			return nil, trace.Wrap(err)
+		}
+	}
 	return &key, nil
 }
 
-func (k KeychainLocalKeyStore) DeleteKey(proxy string, username string) error {
+func (k KeychainLocalKeyStore) DeleteKey(proxy string, username string, opts ...KeyOption) error {
 	err := keychain.DeleteItem(keychain.NewGenericPassword("teleport", username, proxy, nil, ""))
-	switch err {
-	case nil, keychain.ErrorItemNotFound:
-		return nil
-	default:
+	if err != nil && err != keychain.ErrorItemNotFound {
 		return err
 	}
+	for _, o := range opts {
+		if err := o.deleteKey(k.KeyDir, username); err != nil {
+			return trace.Wrap(err)
+		}
+	}
+	return nil
 }
 
 func (k KeychainLocalKeyStore) DeleteKeys() error {

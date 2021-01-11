@@ -401,18 +401,15 @@ func readProfile(profileDir string, profileName string) (*ProfileStatus, error) 
 	}
 
 	// Read in the SSH certificate for the user logged into this proxy.
-	var store LocalKeyStore
-	store, err = NewFSLocalKeyStore(profileDir)
+	store, err := NewFSLocalKeyStore(profileDir)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
+	var keystore LocalKeyStore = store
 	if profile.UseKeychain {
-		store, err = NewKeychainLocalKeyStore(store)
-		if err != nil {
-			return nil, trace.Wrap(err)
-		}
+		keystore = NewKeychainLocalKeyStore(store)
 	}
-	key, err := store.GetKey(profile.Name(), profile.Username, WithKubeCerts(profile.SiteName))
+	key, err := keystore.GetKey(profile.Name(), profile.Username, WithKubeCerts(profile.SiteName))
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
@@ -850,16 +847,13 @@ func NewClient(c *Config) (tc *TeleportClient, err error) {
 
 	// initialize the local agent (auth agent which uses local SSH keys signed by the CA):
 	webProxyHost, _ := tc.WebProxyHostPort()
-	var keystore LocalKeyStore
-	keystore, err = NewFSLocalKeyStore(c.KeysDir)
+	store, err := NewFSLocalKeyStore(c.KeysDir)
 	if err != nil {
 		return nil, trace.Wrap(err)
 	}
+	var keystore LocalKeyStore = store
 	if c.UseKeychain {
-		keystore, err = NewKeychainLocalKeyStore(keystore)
-		if err != nil {
-			return nil, trace.Wrap(err)
-		}
+		keystore = NewKeychainLocalKeyStore(store)
 	}
 	tc.localAgent, err = NewLocalAgent(keystore, webProxyHost, c.Username, c.UseLocalSSHAgent)
 	if err != nil {
