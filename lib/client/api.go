@@ -172,6 +172,9 @@ type Config struct {
 	// against Teleport client and obtaining credentials from elsewhere.
 	SkipLocalAuth bool
 
+	// UseKeychain tells the client to store credentials in the OS keychain rather than on disk
+	UseKeychain bool
+
 	// Agent is used when SkipLocalAuth is true
 	Agent agent.Agent
 
@@ -833,20 +836,27 @@ func NewClient(c *Config) (tc *TeleportClient, err error) {
 		if c.Agent != nil {
 			tc.localAgent = &LocalKeyAgent{Agent: c.Agent}
 		}
+
+		return tc, nil
+	}
+
+	// initialize the local agent (auth agent which uses local SSH keys signed by the CA):
+	webProxyHost, _ := tc.WebProxyHostPort()
+	var keystore LocalKeyStore
+	if c.UseKeychain {
+		keystore, err = NewKeychainLocalKeyStore()
 	} else {
-		// initialize the local agent (auth agent which uses local SSH keys signed by the CA):
-		webProxyHost, _ := tc.WebProxyHostPort()
-		keystore, err := NewFSLocalKeyStore(c.KeysDir)
-		if err != nil {
-			return nil, trace.Wrap(err)
-		}
-		tc.localAgent, err = NewLocalAgent(keystore, webProxyHost, c.Username, c.UseLocalSSHAgent)
-		if err != nil {
-			return nil, trace.Wrap(err)
-		}
-		if tc.HostKeyCallback == nil {
-			tc.HostKeyCallback = tc.localAgent.CheckHostSignature
-		}
+		keystore, err = NewFSLocalKeyStore(c.KeysDir)
+	}
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+	tc.localAgent, err = NewLocalAgent(keystore, webProxyHost, c.Username, c.UseLocalSSHAgent)
+	if err != nil {
+		return nil, trace.Wrap(err)
+	}
+	if tc.HostKeyCallback == nil {
+		tc.HostKeyCallback = tc.localAgent.CheckHostSignature
 	}
 
 	return tc, nil
