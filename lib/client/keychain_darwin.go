@@ -5,7 +5,6 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/gravitational/trace"
 	"github.com/keybase/go-keychain"
@@ -13,7 +12,7 @@ import (
 
 // KeychainLocalKeyStore stores sensitive key material in the OS keychain and delegates
 // non-sensitive/public material to the wrapped LocalKeyStore (usually the filesystem)
-type KeychainLocalKeyStore struct{
+type KeychainLocalKeyStore struct {
 	LocalKeyStore
 }
 
@@ -30,7 +29,7 @@ func (k KeychainLocalKeyStore) AddKey(proxy string, username string, key *Key) e
 	}
 	// always delete the key (if it exists)
 	_ = k.DeleteKey(proxy, username)
-	return keychain.AddItem(keychain.NewGenericPassword("teleport", username, proxy,  data, ""))
+	return keychain.AddItem(keychain.NewGenericPassword("teleport", username, proxy, data, ""))
 }
 
 func (k KeychainLocalKeyStore) GetKey(proxy string, username string) (*Key, error) {
