@@ -100,7 +100,7 @@ func NewKeyStoreCertChecker(keyStore LocalKeyStore) ssh.HostKeyCallback {
 	}
 }
 
-// NewLocalAgent reads all Teleport certificates from disk (using FSLocalKeyStore),
+// NewLocalAgent reads all Teleport certificates (using the provided LocalKeyStore),
 // creates a LocalKeyAgent, loads all certificates into it, and returns the agent.
 func NewLocalAgent(keystore LocalKeyStore, proxyHost string, username string, useLocalSSHAgent bool) (a *LocalKeyAgent, err error) {
 	a = &LocalKeyAgent{
