@@ -102,12 +102,7 @@ func NewKeyStoreCertChecker(keyStore LocalKeyStore) ssh.HostKeyCallback {
 
 // NewLocalAgent reads all Teleport certificates from disk (using FSLocalKeyStore),
 // creates a LocalKeyAgent, loads all certificates into it, and returns the agent.
-func NewLocalAgent(keyDir, proxyHost, username string, useLocalSSHAgent bool) (a *LocalKeyAgent, err error) {
-	keystore, err := NewFSLocalKeyStore(keyDir)
-	if err != nil {
-		return nil, trace.Wrap(err)
-	}
-
+func NewLocalAgent(keystore LocalKeyStore, proxyHost string, username string, useLocalSSHAgent bool) (a *LocalKeyAgent, err error) {
 	a = &LocalKeyAgent{
 		log: logrus.WithFields(logrus.Fields{
 			trace.Component: teleport.ComponentKeyAgent,

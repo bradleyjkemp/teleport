@@ -836,7 +836,11 @@ func NewClient(c *Config) (tc *TeleportClient, err error) {
 	} else {
 		// initialize the local agent (auth agent which uses local SSH keys signed by the CA):
 		webProxyHost, _ := tc.WebProxyHostPort()
-		tc.localAgent, err = NewLocalAgent(c.KeysDir, webProxyHost, c.Username, c.UseLocalSSHAgent)
+		keystore, err := NewFSLocalKeyStore(c.KeysDir)
+		if err != nil {
+			return nil, trace.Wrap(err)
+		}
+		tc.localAgent, err = NewLocalAgent(keystore, webProxyHost, c.Username, c.UseLocalSSHAgent)
 		if err != nil {
 			return nil, trace.Wrap(err)
 		}
